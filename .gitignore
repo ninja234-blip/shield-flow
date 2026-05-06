@@ -1,0 +1,18 @@
+# Data — never commit raw CSVs
+data/raw/
+data/processed/
+
+# Model artifacts — large binary files
+services/model/*.pkl
+services/model/*.bin
+
+# Python
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+
+# secrets
+*.json
+!services/model/metadata.json

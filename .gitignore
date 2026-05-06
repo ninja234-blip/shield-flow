@@ -16,3 +16,4 @@ venv/
 # secrets
 *.json
 !services/model/metadata.json
+venv/

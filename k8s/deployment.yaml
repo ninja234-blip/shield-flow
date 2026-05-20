@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shield-flow-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shield-flow-api
+  template:
+    metadata:
+      labels:
+        app: shield-flow-api
+    spec:
+      containers:
+      - name: api
+        image: us-central1-docker.pkg.dev/shield-flow-496918/shield-flow/api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: PINECONE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: shield-flow-secrets
+              key: pinecone-api-key
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: shield-flow-secrets
+              key: gemini-api-key
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shield-flow-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: shield-flow-api
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: shield-flow-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: shield-flow-api
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

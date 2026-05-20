@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+xgboost==2.0.3
+numpy
+joblib
+pinecone
+sentence-transformers
+google-genai
+python-multipart
+shap
+scikit-learn
